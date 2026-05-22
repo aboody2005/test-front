@@ -74,8 +74,6 @@
   right: auto;
   left: 0;
 }
-<<<<<<< HEAD
-
 @media (max-width: 600px) {
   .topbar {
     padding: 0 12px;
@@ -102,5 +100,3 @@
     gap: 0;
   }
 }
-=======
->>>>>>> 8366b31fea862c2e1c8adb0342f46b7d399361bd
