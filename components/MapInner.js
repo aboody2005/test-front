@@ -106,17 +106,6 @@ export default function MapInner({ lat, lng, onChange }) {
     );
   };
 
-  const handleManualChange = (field, val) => {
-    const num = parseFloat(val);
-    if (!isNaN(num)) {
-      const nextPos = field === 'lat' ? [num, position[1]] : [position[0], num];
-      setPosition(nextPos);
-      if (onChange) {
-        onChange({ lat: nextPos[0], lng: nextPos[1] });
-      }
-    }
-  };
-
   const externalUrl = `https://www.google.com/maps/search/?api=1&query=${position[0]},${position[1]}`;
 
   return (
@@ -134,11 +123,7 @@ export default function MapInner({ lat, lng, onChange }) {
 
       {/* Info & Actions */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0 }}>
-            {locale === 'ar' ? '📍 الإحداثيات الحالية:' : '📍 Current Coordinates:'} <strong>{position[0]?.toFixed(5)}</strong>, <strong>{position[1]?.toFixed(5)}</strong>
-          </p>
-          
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', flexWrap: 'wrap', gap: 8 }}>
           <a
             href={externalUrl}
             target="_blank"
@@ -151,49 +136,22 @@ export default function MapInner({ lat, lng, onChange }) {
         </div>
 
         {isPicker && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 4, padding: 12, background: 'var(--bg-hover)', borderRadius: 'var(--radius)' }}>
-            <div style={{ display: 'flex', gap: 12 }}>
-              <button
-                type="button"
-                onClick={detectLocation}
-                disabled={detecting}
-                className="btn btn-primary btn-sm"
-                style={{ flex: 1 }}
-              >
-                {detecting 
-                  ? (locale === 'ar' ? '📡 جاري تحديد الموقع...' : '📡 Detecting...') 
-                  : (locale === 'ar' ? '📍 استخدام موقع الـ GPS الحالي الخاص بي' : '📍 Use My Current GPS Location')}
-              </button>
-            </div>
-            
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              <div>
-                <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>{locale === 'ar' ? 'خط العرض (Latitude)' : 'Latitude'}</label>
-                <input
-                  type="number"
-                  step="any"
-                  className="form-control text-sm"
-                  value={position[0] || ''}
-                  onChange={(e) => handleManualChange('lat', e.target.value)}
-                  style={{ padding: '6px 10px' }}
-                />
-              </div>
-              <div>
-                <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>{locale === 'ar' ? 'خط الطول (Longitude)' : 'Longitude'}</label>
-                <input
-                  type="number"
-                  step="any"
-                  className="form-control text-sm"
-                  value={position[1] || ''}
-                  onChange={(e) => handleManualChange('lng', e.target.value)}
-                  style={{ padding: '6px 10px' }}
-                />
-              </div>
-            </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 4, padding: 12, background: 'var(--bg-hover)', borderRadius: 'var(--radius)' }}>
+            <button
+              type="button"
+              onClick={detectLocation}
+              disabled={detecting}
+              className="btn btn-primary btn-sm"
+              style={{ width: '100%' }}
+            >
+              {detecting
+                ? (locale === 'ar' ? '📡 جاري تحديد الموقع...' : '📡 Detecting...')
+                : (locale === 'ar' ? '📍 استخدام موقع الـ GPS الحالي الخاص بي' : '📍 Use My Current GPS Location')}
+            </button>
             <p className="text-xs text-muted" style={{ margin: 0 }}>
-              {locale === 'ar' 
-                ? '* انقر على الخريطة لتحديد الموقع يدوياً، أو اسحب العلامة الزرقاء، أو استخدم زر موقع الـ GPS الحالي.' 
-                : '* Click on the map to pin your location manually, drag the blue marker, or use the current GPS location button.'}
+              {locale === 'ar'
+                ? '* انقر على الخريطة لتحديد الموقع يدوياً، أو اسحب العلامة الزرقاء، أو استخدم زر الـ GPS.'
+                : '* Click the map to pin your location, drag the marker, or use the GPS button.'}
             </p>
           </div>
         )}

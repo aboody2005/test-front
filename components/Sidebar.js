@@ -1,4 +1,5 @@
 'use client';
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
@@ -9,6 +10,7 @@ export default function Sidebar({ mobileOpen, onClose }) {
   const { user, logout } = useAuth();
   const pathname = usePathname();
   const { t } = useTranslation();
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const navItems = {
     student: [
@@ -32,7 +34,15 @@ export default function Sidebar({ mobileOpen, onClose }) {
   };
 
   const items = navItems[user?.role] || [];
-  const userRoleKey = user?.role ? `role${user.role.charAt(0).toUpperCase() + user.role.slice(1)}` : '';
+  const userRoleKey = user?.role
+    ? `role${user.role.charAt(0).toUpperCase() + user.role.slice(1)}`
+    : '';
+
+  const handleLogout = () => {
+    if (loggingOut) return;
+    setLoggingOut(true);
+    logout();
+  };
 
   return (
     <>
@@ -49,7 +59,7 @@ export default function Sidebar({ mobileOpen, onClose }) {
           <div className={styles.userCard}>
             <div className={`avatar avatar-md ${styles.avatar}`}>
               {user?.profileImage
-                ? <img src={user.profileImage} alt={user.name} style={{width:'100%',height:'100%',borderRadius:'50%',objectFit:'cover'}} />
+                ? <img src={user.profileImage} alt={user.name} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
                 : user?.name?.charAt(0).toUpperCase()
               }
             </div>
@@ -78,8 +88,14 @@ export default function Sidebar({ mobileOpen, onClose }) {
 
           {/* Bottom */}
           <div className={styles.bottom}>
-            <button onClick={logout} className={styles.logoutBtn}>
-              <span>🚪</span> {t('navLogout')}
+            <button
+              onClick={handleLogout}
+              className={styles.logoutBtn}
+              disabled={loggingOut}
+              style={{ opacity: loggingOut ? 0.6 : 1, cursor: loggingOut ? 'wait' : 'pointer' }}
+            >
+              <span>{loggingOut ? '⏳' : '🚪'}</span>
+              {loggingOut ? t('navLogout') + '...' : t('navLogout')}
             </button>
           </div>
         </aside>

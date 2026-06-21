@@ -66,7 +66,6 @@ export default function HomePage() {
       <section className={styles.hero}>
         <div className={styles.heroGlow} />
         <div className={styles.heroContent}>
-          <div className={styles.heroBadge}>🇮🇶 {t('iraqGov')}</div>
           <h1 className={styles.heroTitle}>
             {locale === 'ar' ? (
               <>
@@ -87,19 +86,12 @@ export default function HomePage() {
             <Link href="/register" className="btn btn-primary btn-lg">{t('getStarted')} →</Link>
             <Link href="/login" className="btn btn-secondary btn-lg">{t('navLogin')}</Link>
           </div>
-          <div className={styles.heroStats}>
-            <div><strong>3</strong><span>{t('roleAdmin')} & {t('roleTeacher')} & {t('roleStudent')}</span></div>
-            <div><strong>GPS</strong><span>{t('featureGpsLocation')}</span></div>
-            <div><strong>PDF</strong><span>{t('sideReports')}</span></div>
-            <div><strong>Real-time</strong><span>{t('featureTitle')}</span></div>
-          </div>
         </div>
       </section>
 
       {/* About */}
       <section id="about" className={styles.section}>
         <div className={styles.sectionInner}>
-          <div className={styles.sectionTag}>{t('aboutTitle')}</div>
           <h2>{t('aboutTitle')}</h2>
           <p className={styles.sectionDesc}>
             {t('aboutText1')}
@@ -113,7 +105,6 @@ export default function HomePage() {
       {/* Features */}
       <section id="features" className={`${styles.section} ${styles.sectionAlt}`}>
         <div className={styles.sectionInner}>
-          <div className={styles.sectionTag}>{t('navFeatures')}</div>
           <h2>{t('featureTitle')}</h2>
           <div className={`grid grid-3 ${styles.featGrid}`} style={{ marginTop: 40 }}>
             {features.map(({ icon, title, desc }, idx) => (
@@ -130,7 +121,6 @@ export default function HomePage() {
       {/* Contact */}
       <section id="contact" className={styles.section}>
         <div className={styles.sectionInner} style={{ maxWidth: 600, textAlign: 'center' }}>
-          <div className={styles.sectionTag}>{t('navContact')}</div>
           <h2>{t('contactTitle')}</h2>
           <p className={styles.sectionDesc}>{t('contactSubtitle')}</p>
           <div className={styles.contactGrid}>

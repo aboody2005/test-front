@@ -1,6 +1,5 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useTranslation } from '@/context/LanguageContext';
 import Sidebar from '@/components/Sidebar';
@@ -23,7 +22,6 @@ const routeTitleKeys = {
 
 export default function DashboardLayout({ children }) {
   const { user, loading } = useAuth();
-  const router = useRouter();
   const { t } = useTranslation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [pathname, setPathname] = useState('');
@@ -34,9 +32,6 @@ export default function DashboardLayout({ children }) {
     });
   }, []);
 
-  useEffect(() => {
-    if (!loading && !user) router.push('/login');
-  }, [user, loading, router]);
 
   if (loading) {
     return (

@@ -15,11 +15,12 @@
 }
 .navInner {
   max-width: 1200px; margin: 0 auto; padding: 0 24px; height: 70px;
-  display: flex; align-items: center; justify-content: space-between;
+  display: flex; align-items: center; gap: 32px;
 }
 .logo {
   display: flex; align-items: center; gap: 10px; font-size: 1.35rem; font-weight: 800;
   color: var(--text-primary); letter-spacing: -0.03em;
+  margin-right: auto;
 }
 .logoIcon {
   font-size: 1.6rem;
@@ -76,8 +77,8 @@
 
 /* Hero */
 .hero {
-  min-height: 90vh; display: flex; align-items: center; justify-content: center;
-  position: relative; overflow: hidden; padding-top: 100px; padding-bottom: 60px;
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden; padding-top: 120px; padding-bottom: 80px;
 }
 .heroGlow {
   position: absolute; top: 15%; left: 50%; transform: translateX(-50%);
@@ -106,7 +107,7 @@
   font-size: 1.1rem; color: var(--text-secondary); max-width: 680px;
   margin: 0 auto 36px; line-height: 1.75;
 }
-.heroBtns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 64px; }
+.heroBtns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 0; }
 .heroStats {
   display: flex; gap: 50px; justify-content: center; flex-wrap: wrap;
   padding-top: 36px; border-top: 1px solid var(--border-light);
@@ -148,6 +149,10 @@
 .featCard p { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.65; }
 
 /* Arabic specific overrides inside CSS Modules */
+:global(html[dir="rtl"]) .logo {
+  margin-right: 0;
+  margin-left: auto;
+}
 :global(html[dir="rtl"]) .featCard {
   text-align: right;
 }
@@ -207,8 +212,8 @@
 }
 @media (max-width: 480px) {
   .hero {
-    padding-top: 80px;
-    min-height: 80vh;
+    padding-top: 100px;
+    padding-bottom: 60px;
   }
   .heroStats {
     gap: 18px;
