@@ -105,13 +105,14 @@ export const api = {
       if (!token || !password) throw new Error('Token and password required');
       if (password.length < 6) throw new Error('Password must be at least 6 characters');
 
-      const { data: success, error } = await supabase.rpc('reset_password_with_token', {
-        p_token: token,
-        p_password: password,
+      const res = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, password }),
       });
 
-      if (error) throwError(error, 'Password reset failed');
-      if (!success) throw new Error('Invalid or expired reset token');
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Password reset failed');
 
       return { message: 'Password reset successfully' };
     },
