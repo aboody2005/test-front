@@ -9,7 +9,7 @@
   box-shadow: var(--shadow-sm);
 }
 .left { display: flex; align-items: center; gap: 16px; }
-.menuBtn { display: none; background: none; border: none; font-size: 1.4rem; color: var(--text-primary); transition: transform var(--transition); }
+.menuBtn { display: none; background: none; border: none; font-size: 1.4rem; color: var(--text-primary); transition: transform var(--transition); cursor: pointer; }
 .menuBtn:hover { transform: scale(1.1); }
 .title {
   font-size: 1.1rem;
