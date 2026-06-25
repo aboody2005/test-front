@@ -4,6 +4,7 @@ import { useTheme } from '@/context/ThemeContext';
 import { useTranslation } from '@/context/LanguageContext';
 import { api } from '@/utils/api';
 import { format } from 'date-fns';
+import { formatTimeOnly12h } from '@/utils/date';
 import styles from './Topbar.module.css';
 
 export default function Topbar({ onMenuToggle, title }) {
@@ -94,7 +95,7 @@ export default function Topbar({ onMenuToggle, title }) {
                       <span className={styles.notifIcon}>{typeIcon[n.type] || 'ℹ️'}</span>
                       <div>
                         <p className={styles.notifMsg}>{translateMessage(n.message)}</p>
-                        <p className={styles.notifTime}>{format(new Date(n.createdAt), 'dd MMM, HH:mm')}</p>
+                        <p className={styles.notifTime}>{format(new Date(n.createdAt), 'dd MMM, ')}{formatTimeOnly12h(n.createdAt, locale)}</p>
                       </div>
                     </div>
                   ))

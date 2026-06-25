@@ -4,6 +4,7 @@ import { api } from '@/utils/api';
 import { useAuth } from '@/context/AuthContext';
 import { format } from 'date-fns';
 import { useTranslation } from '@/context/LanguageContext';
+import { formatTimeOnly12h } from '@/utils/date';
 
 export default function TeacherDashboard() {
   const { user } = useAuth();
@@ -88,7 +89,7 @@ export default function TeacherDashboard() {
                 <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'var(--green-dim)', color: 'var(--green)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', flexShrink: 0 }}>✅</div>
                 <div style={{ flex: 1 }}>
                   <p style={{ fontWeight: 600, fontSize: '0.875rem' }}>{v.studentName}</p>
-                  <p className="text-xs text-muted">{format(new Date(v.visitedAt), 'dd MMM yyyy, HH:mm')}</p>
+                  <p className="text-xs text-muted">{format(new Date(v.visitedAt), 'dd MMM yyyy, ')}{formatTimeOnly12h(v.visitedAt, locale)}</p>
                 </div>
               </div>
             ))}

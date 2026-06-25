@@ -4,8 +4,20 @@ import { supabase } from '@/lib/supabaseClient';
 import { format } from 'date-fns';
 import { useTranslation } from '@/context/LanguageContext';
 import dynamic from 'next/dynamic';
+import { formatDateTime12h } from '@/utils/date';
 
 const MapInner = dynamic(() => import('@/components/MapInner'), { ssr: false });
+
+/** Convert stored 24h value (e.g. "16:00") to Arabic 12h label */
+const TIME_LABELS = {
+  '07:00': '7:00 صباحًا',  '08:00': '8:00 صباحًا',  '09:00': '9:00 صباحًا',
+  '10:00': '10:00 صباحًا', '11:00': '11:00 صباحًا', '12:00': '12:00 ظهرًا',
+  '13:00': '1:00 مساءً',   '14:00': '2:00 مساءً',   '15:00': '3:00 مساءً',
+  '16:00': '4:00 مساءً',   '17:00': '5:00 مساءً',   '18:00': '6:00 مساءً',
+  '19:00': '7:00 مساءً',   '20:00': '8:00 مساءً',   '21:00': '9:00 مساءً',
+  '22:00': '10:00 مساءً',  '23:00': '11:00 مساءً',  '00:00': '12:00 منتصف الليل',
+};
+const fmt12h = (v) => (v && TIME_LABELS[v]) ? TIME_LABELS[v] : (v || '—');
 
 export default function AdminVisits() {
   const { locale, t } = useTranslation();
@@ -72,6 +84,8 @@ export default function AdminVisits() {
             visitDate: visit?.visited_at || null,
             visitNotes: visit?.notes || '',
             visitTeacherName: visit?.teacher_name || '',
+            attendanceStart: s.attendance_start || '',
+            attendanceEnd: s.attendance_end || '',
           };
         });
 
@@ -363,6 +377,10 @@ export default function AdminVisits() {
                     selected.status === 'completed'
                       ? (locale === 'ar' ? 'مكتمل' : 'Completed')
                       : (locale === 'ar' ? 'نشط' : 'Active')],
+                  [locale === 'ar' ? 'وقت بداية التواجد' : 'Attendance Start',
+                    fmt12h(selected.attendanceStart)],
+                  [locale === 'ar' ? 'وقت انتهاء التواجد' : 'Attendance End',
+                    fmt12h(selected.attendanceEnd)],
                 ].map(([l, v]) => (
                   <div key={l} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <span className="text-muted" style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{l}</span>
@@ -383,7 +401,7 @@ export default function AdminVisits() {
                       <span>📅</span>
                       <span>
                         {locale === 'ar' ? 'تاريخ الزيارة: ' : 'Visited on: '}
-                        <strong>{format(new Date(selected.visitDate), 'dd/MM/yyyy HH:mm')}</strong>
+                        <strong>{formatDateTime12h(selected.visitDate, locale)}</strong>
                       </span>
                     </div>
                     {selected.visitTeacherName && (

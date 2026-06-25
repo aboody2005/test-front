@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { api } from '@/utils/api';
 import { format, differenceInDays } from 'date-fns';
 import { useTranslation } from '@/context/LanguageContext';
+import { formatTimeOnly12h } from '@/utils/date';
 
 function ProfileRing({ pct }) {
   const r = 40, c = 2 * Math.PI * r;
@@ -158,7 +159,7 @@ export default function StudentDashboard() {
                     <tr key={v._id}>
                       <td>{v.teacherName}</td>
                       <td>{format(new Date(v.visitedAt), 'dd MMM yyyy')}</td>
-                      <td>{format(new Date(v.visitedAt), 'HH:mm')}</td>
+                      <td>{formatTimeOnly12h(v.visitedAt, locale)}</td>
                       <td style={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v.notes || '—'}</td>
                       <td><span className="badge badge-success">✅ {locale === 'ar' ? 'تمت الزيارة' : v.status}</span></td>
                     </tr>

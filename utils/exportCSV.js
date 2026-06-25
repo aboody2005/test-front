@@ -1,5 +1,6 @@
 import Papa from 'papaparse';
 import { format } from 'date-fns';
+import { formatDateTime12h, formatTimeOnly12h } from './date';
 
 export function exportReportsCSV(reports, filename = 'student_reports', locale = 'en') {
   const isAr = locale === 'ar';
@@ -30,7 +31,7 @@ export function exportReportsCSV(reports, filename = 'student_reports', locale =
         'تاريخ البدء': r.student.startDate ? format(new Date(r.student.startDate), 'dd/MM/yyyy') : '',
         'تاريخ الانتهاء': r.student.endDate ? format(new Date(r.student.endDate), 'dd/MM/yyyy') : '',
         'إجمالي الزيارات': r.visitCount,
-        'آخر زيارة': r.lastVisit ? format(new Date(r.lastVisit), 'dd/MM/yyyy HH:mm') : 'لا يوجد',
+        'آخر زيارة': r.lastVisit ? formatDateTime12h(r.lastVisit, 'ar') : 'لا يوجد',
       };
     } else {
       return {
@@ -49,7 +50,7 @@ export function exportReportsCSV(reports, filename = 'student_reports', locale =
         'Start Date': r.student.startDate ? format(new Date(r.student.startDate), 'dd/MM/yyyy') : '',
         'End Date': r.student.endDate ? format(new Date(r.student.endDate), 'dd/MM/yyyy') : '',
         'Total Visits': r.visitCount,
-        'Last Visit': r.lastVisit ? format(new Date(r.lastVisit), 'dd/MM/yyyy HH:mm') : 'None',
+        'Last Visit': r.lastVisit ? formatDateTime12h(r.lastVisit, 'en') : 'None',
       };
     }
   });
@@ -67,7 +68,7 @@ export function exportVisitsCSV(visits, studentName, locale = 'en') {
         'اسم المشرف': v.teacherName || '',
         'اسم الطالب': v.studentName || studentName || '',
         'التاريخ': format(new Date(v.visitedAt), 'dd/MM/yyyy'),
-        'الوقت': format(new Date(v.visitedAt), 'HH:mm'),
+        'الوقت': formatTimeOnly12h(v.visitedAt, 'ar'),
         'ملاحظات': v.notes || '',
         'الحالة': 'تمت الزيارة',
       };
@@ -76,7 +77,7 @@ export function exportVisitsCSV(visits, studentName, locale = 'en') {
         'Teacher Name': v.teacherName || '',
         'Student Name': v.studentName || studentName || '',
         'Date': format(new Date(v.visitedAt), 'dd/MM/yyyy'),
-        'Time': format(new Date(v.visitedAt), 'HH:mm'),
+        'Time': formatTimeOnly12h(v.visitedAt, 'en'),
         'Notes': v.notes || '',
         'Status': v.status || 'visited',
       };
