@@ -310,6 +310,10 @@ export default function TeacherStudents() {
                     selected.startDate ? format(new Date(selected.startDate), 'dd/MM/yyyy') : '—'],
                   [locale === 'ar' ? 'تاريخ الانتهاء' : 'End Date',
                     selected.endDate ? format(new Date(selected.endDate), 'dd/MM/yyyy') : '—'],
+                  [locale === 'ar' ? 'وقت بداية التواجد' : 'Attendance Start',
+                    selected.attendanceStart || '—'],
+                  [locale === 'ar' ? 'وقت انتهاء التواجد' : 'Attendance End',
+                    selected.attendanceEnd || '—'],
                 ].map(([l, v]) => (
                   <div key={l} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <span className="text-muted" style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{l}</span>

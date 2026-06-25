@@ -43,6 +43,8 @@ CREATE TABLE IF NOT EXISTS students (
   longitude DOUBLE PRECISION DEFAULT NULL,
   teacher_id UUID DEFAULT NULL REFERENCES profiles(id) ON DELETE SET NULL,
   status TEXT DEFAULT 'active' CHECK (status IN ('active', 'completed')),
+  attendance_start TEXT DEFAULT NULL,
+  attendance_end TEXT DEFAULT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );

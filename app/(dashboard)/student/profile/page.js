@@ -16,7 +16,7 @@ export default function StudentProfile() {
   const fileRef = useRef();
 
   const [userForm, setUserForm] = useState({ name: '', email: '', phone: '', gender: '', profileImage: '', password: '', confirmPassword: '' });
-  const [studentForm, setStudentForm] = useState({ university: '', pharmacyName: '', startDate: '', endDate: '', locationId: '', latitude: null, longitude: null });
+  const [studentForm, setStudentForm] = useState({ university: '', pharmacyName: '', startDate: '', endDate: '', locationId: '', latitude: null, longitude: null, attendanceStart: '', attendanceEnd: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -45,6 +45,8 @@ export default function StudentProfile() {
           startDate: s.startDate ? s.startDate.split('T')[0] : '',
           endDate: s.endDate ? s.endDate.split('T')[0] : '',
           locationId: s.locationId?._id || '', latitude: s.latitude, longitude: s.longitude,
+          attendanceStart: s.attendanceStart || '',
+          attendanceEnd: s.attendanceEnd || '',
         });
       } catch {
         toast.error(locale === 'ar' ? 'فشل تحميل الملف الشخصي' : 'Failed to load profile');
@@ -219,6 +221,85 @@ export default function StudentProfile() {
               <input className="form-control" placeholder={locale === 'ar' ? 'مثال: صيدلية النور' : 'e.g. Al-Nour Pharmacy'} value={studentForm.pharmacyName}
                 onChange={e => setStudentForm(p => ({ ...p, pharmacyName: e.target.value }))} />
             </div>
+
+            {/* Attendance Time */}
+            {(() => {
+              const timeSlots = [
+                { value: '07:00', label: '7:00 صباحًا' },
+                { value: '08:00', label: '8:00 صباحًا' },
+                { value: '09:00', label: '9:00 صباحًا' },
+                { value: '10:00', label: '10:00 صباحًا' },
+                { value: '11:00', label: '11:00 صباحًا' },
+                { value: '12:00', label: '12:00 ظهرًا' },
+                { value: '13:00', label: '1:00 مساءً' },
+                { value: '14:00', label: '2:00 مساءً' },
+                { value: '15:00', label: '3:00 مساءً' },
+                { value: '16:00', label: '4:00 مساءً' },
+                { value: '17:00', label: '5:00 مساءً' },
+                { value: '18:00', label: '6:00 مساءً' },
+                { value: '19:00', label: '7:00 مساءً' },
+                { value: '20:00', label: '8:00 مساءً' },
+                { value: '21:00', label: '9:00 مساءً' },
+                { value: '22:00', label: '10:00 مساءً' },
+                { value: '23:00', label: '11:00 مساءً' },
+                { value: '00:00', label: '12:00 منتصف الليل' },
+              ];
+              return (
+                <div className="form-group">
+                  <label className="form-label" style={{ display: 'block', marginBottom: 8 }}>
+                    🕐 {locale === 'ar' ? 'وقت التواجد في الصيدلية' : 'Pharmacy Attendance Hours'}
+                  </label>
+                  <div className="grid grid-2" style={{ gap: 12 }}>
+                    <div>
+                      <label className="form-label" style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: 4 }}>
+                        {locale === 'ar' ? 'وقت بداية التواجد' : 'Start Time'}
+                      </label>
+                      <select
+                        className="form-control"
+                        value={studentForm.attendanceStart}
+                        onChange={e => {
+                          const newStart = e.target.value;
+                          setStudentForm(p => ({
+                            ...p,
+                            attendanceStart: newStart,
+                            // clear end time if it is no longer strictly greater than the new start
+                            attendanceEnd: p.attendanceEnd && newStart && p.attendanceEnd <= newStart ? '' : p.attendanceEnd,
+                          }));
+                        }}
+                      >
+                        <option value="">{locale === 'ar' ? 'اختر وقت البداية' : 'Select start time'}</option>
+                        {timeSlots
+                          .filter(ts => !studentForm.attendanceEnd || ts.value !== studentForm.attendanceEnd)
+                          .map(ts => (
+                            <option key={ts.value} value={ts.value}>{ts.label}</option>
+                          ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="form-label" style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: 4 }}>
+                        {locale === 'ar' ? 'وقت انتهاء التواجد' : 'End Time'}
+                      </label>
+                      <select
+                        className="form-control"
+                        value={studentForm.attendanceEnd}
+                        onChange={e => setStudentForm(p => ({ ...p, attendanceEnd: e.target.value }))}
+                      >
+                        <option value="">{locale === 'ar' ? 'اختر وقت الانتهاء' : 'Select end time'}</option>
+                        {timeSlots
+                          .filter(ts => {
+                            // Must be strictly greater than start time
+                            if (studentForm.attendanceStart && ts.value <= studentForm.attendanceStart) return false;
+                            return true;
+                          })
+                          .map(ts => (
+                            <option key={ts.value} value={ts.value}>{ts.label}</option>
+                          ))}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
             <div className="grid grid-2" style={{ gap: 16 }}>
               <div className="form-group">
                 <label className="form-label">{t('startDateLabel')}</label>
