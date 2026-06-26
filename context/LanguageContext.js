@@ -349,7 +349,7 @@ const translations = {
 };
 
 export function LanguageProvider({ children }) {
-  const [locale, setLocale] = useState('en');
+  const [locale, setLocale] = useState('ar');
 
   useEffect(() => {
     const saved = localStorage.getItem('ptms_lang');
