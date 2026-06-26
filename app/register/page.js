@@ -302,7 +302,7 @@ export default function RegisterPage() {
                   <label className="form-label" style={{ color: 'var(--text-secondary)' }}>{t('regionLabel')} *</label>
                   <input
                     className="form-control"
-                    placeholder={locale === 'ar' ? 'مثال: الزهور' : 'e.g. Al-Zuhour'}
+                    placeholder={locale === 'ar' ? 'مثال: حي الزهور' : 'e.g. Al-Zuhour Quarter'}
                     value={newLocForm.region}
                     onChange={(e) => setNewLocForm((p) => ({ ...p, region: e.target.value }))}
                     required
