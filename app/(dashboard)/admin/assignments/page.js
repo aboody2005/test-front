@@ -20,6 +20,9 @@ export default function AdminAssignments() {
   const [bulkUpdating, setBulkUpdating] = useState(false);
   const [lockEdits, setLockEdits] = useState(false);
   const [updatingLock, setUpdatingLock] = useState(false);
+  const [monthFilter, setMonthFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [sortBy, setSortBy] = useState('name');
 
   useEffect(() => {
     async function load() {
@@ -183,13 +186,51 @@ export default function AdminAssignments() {
     }
   };
 
+  const getStudentMonth = (s) => {
+    if (!s.startDate) return 'not_set';
+    if (s.startDate.includes('-07-') || s.startDate.endsWith('-07-01')) return 'july';
+    if (s.startDate.includes('-08-') || s.startDate.endsWith('-08-01')) return 'august';
+    try {
+      const date = new Date(s.startDate);
+      const month = date.getMonth();
+      if (month === 6) return 'july';
+      if (month === 7) return 'august';
+    } catch {}
+    return 'other';
+  };
+
   const filtered = students
     .filter(s => {
       const matchSearch = !search || s.userId?.name?.toLowerCase().includes(search.toLowerCase());
       const matchLocation = !locationFilter || s.locationId?._id === locationFilter;
-      return matchSearch && matchLocation;
+      
+      const sMonth = getStudentMonth(s);
+      const matchMonth = !monthFilter || sMonth === monthFilter;
+      
+      const matchStatus = !statusFilter || s.status === statusFilter;
+      
+      return matchSearch && matchLocation && matchMonth && matchStatus;
     })
-    .sort((a, b) => (a.userId?.name || '').localeCompare(b.userId?.name || ''));
+    .sort((a, b) => {
+      if (sortBy === 'month') {
+        const getMonthOrder = (s) => {
+          const m = getStudentMonth(s);
+          if (m === 'july') return 1;
+          if (m === 'august') return 2;
+          if (m === 'other') return 3;
+          return 4; // 'not_set'
+        };
+        const orderA = getMonthOrder(a);
+        const orderB = getMonthOrder(b);
+        if (orderA !== orderB) return orderA - orderB;
+      } else if (sortBy === 'status') {
+        const statusOrder = { active: 1, completed: 2 };
+        const orderA = statusOrder[a.status] || 3;
+        const orderB = statusOrder[b.status] || 3;
+        if (orderA !== orderB) return orderA - orderB;
+      }
+      return (a.userId?.name || '').localeCompare(b.userId?.name || '');
+    });
 
   return (
     <div>
@@ -248,7 +289,7 @@ export default function AdminAssignments() {
         </div>
         <select
           className="form-control"
-          style={{ width: 220 }}
+          style={{ width: 180 }}
           value={locationFilter}
           onChange={e => setLocationFilter(e.target.value)}
         >
@@ -258,6 +299,37 @@ export default function AdminAssignments() {
               {l.region || l.name} — {l.city}
             </option>
           ))}
+        </select>
+        <select
+          className="form-control"
+          style={{ width: 180 }}
+          value={monthFilter}
+          onChange={e => setMonthFilter(e.target.value)}
+        >
+          <option value="">{locale === 'ar' ? 'كل شهور التدريب' : 'All Training Months'}</option>
+          <option value="july">{locale === 'ar' ? 'شهر السابع (يوليو)' : 'July'}</option>
+          <option value="august">{locale === 'ar' ? 'شهر الثامن (أغسطس)' : 'August'}</option>
+          <option value="not_set">{locale === 'ar' ? 'غير محدد' : 'Not Set'}</option>
+        </select>
+        <select
+          className="form-control"
+          style={{ width: 180 }}
+          value={statusFilter}
+          onChange={e => setStatusFilter(e.target.value)}
+        >
+          <option value="">{locale === 'ar' ? 'كل الحالات' : 'All Statuses'}</option>
+          <option value="active">{locale === 'ar' ? 'تدريب نشط' : 'Active Training'}</option>
+          <option value="completed">{locale === 'ar' ? 'مكتمل' : 'Completed'}</option>
+        </select>
+        <select
+          className="form-control"
+          style={{ width: 180 }}
+          value={sortBy}
+          onChange={e => setSortBy(e.target.value)}
+        >
+          <option value="name">{locale === 'ar' ? 'ترتيب حسب: الاسم' : 'Sort by: Name'}</option>
+          <option value="month">{locale === 'ar' ? 'ترتيب حسب: شهر التدريب' : 'Sort by: Month'}</option>
+          <option value="status">{locale === 'ar' ? 'ترتيب حسب: الحالة' : 'Sort by: Status'}</option>
         </select>
       </div>
 
