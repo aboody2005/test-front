@@ -18,6 +18,8 @@ export default function AdminAssignments() {
   const [bulkEndDate, setBulkEndDate] = useState('');
   const [savedGlobalEndDate, setSavedGlobalEndDate] = useState('');
   const [bulkUpdating, setBulkUpdating] = useState(false);
+  const [lockEdits, setLockEdits] = useState(false);
+  const [updatingLock, setUpdatingLock] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -42,6 +44,12 @@ export default function AdminAssignments() {
           setSavedGlobalEndDate(dateStr);
         }
       } catch {}
+
+      // Separately fetch the saved lock status
+      try {
+        const lockRes = await api.students.getLockStudentEdits();
+        setLockEdits(lockRes.lockStudentEdits);
+      } catch {}
     }
     load();
   }, []);
@@ -65,6 +73,43 @@ export default function AdminAssignments() {
       teacherId: student.teacherId?._id || student.teacherId || '',
       locationId: student.locationId?._id || student.locationId || '',
     });
+  };
+
+  const getEditTrainingMonthValue = () => {
+    if (!editForm.startDate) return '';
+    if (editForm.startDate.includes('-07-') || editForm.startDate.endsWith('-07-01')) return 'july';
+    if (editForm.startDate.includes('-08-') || editForm.startDate.endsWith('-08-01')) return 'august';
+    try {
+      const date = new Date(editForm.startDate);
+      const month = date.getMonth();
+      if (month === 6) return 'july';
+      if (month === 7) return 'august';
+    } catch {}
+    return '';
+  };
+
+  const handleEditTrainingMonthChange = (e) => {
+    const val = e.target.value;
+    const year = editForm.startDate ? new Date(editForm.startDate).getFullYear() : 2026;
+    if (val === 'july') {
+      setEditForm(p => ({
+        ...p,
+        startDate: `${year}-07-01`,
+        endDate: `${year}-07-31`
+      }));
+    } else if (val === 'august') {
+      setEditForm(p => ({
+        ...p,
+        startDate: `${year}-08-01`,
+        endDate: `${year}-08-31`
+      }));
+    } else {
+      setEditForm(p => ({
+        ...p,
+        startDate: '',
+        endDate: ''
+      }));
+    }
   };
 
   const handleSaveEdit = async (e) => {
@@ -120,6 +165,24 @@ export default function AdminAssignments() {
     }
   };
 
+  const handleToggleLock = async () => {
+    setUpdatingLock(true);
+    try {
+      const targetState = !lockEdits;
+      await api.students.setLockStudentEdits(targetState);
+      setLockEdits(targetState);
+      toast.success(
+        locale === 'ar'
+          ? (targetState ? '🔒 تم إيقاف تعديل بيانات الطلاب بنجاح!' : '🔓 تم السماح بتعديل بيانات الطلاب!')
+          : (targetState ? '🔒 Student edits locked successfully!' : '🔓 Student edits allowed!')
+      );
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setUpdatingLock(false);
+    }
+  };
+
   const filtered = students
     .filter(s => {
       const matchSearch = !search || s.userId?.name?.toLowerCase().includes(search.toLowerCase());
@@ -138,41 +201,37 @@ export default function AdminAssignments() {
       </div>
 
       <div className="card" style={{ marginBottom: 20, padding: 16, borderLeft: '3px solid var(--accent)' }}>
-        <h4 style={{ marginBottom: 4 }}>📅 {locale === 'ar' ? 'تاريخ انتهاء التدريب الافتراضي' : 'Default Training End Date'}</h4>
+        <h4 style={{ marginBottom: 4 }}>🔒 {locale === 'ar' ? 'التحكم في تعديل البيانات للطلاب' : 'Student Edits Control'}</h4>
         <p className="text-muted" style={{ fontSize: '0.85rem', marginBottom: 14 }}>
           {locale === 'ar'
-            ? 'سيتم تطبيق هذا التاريخ على جميع الطلاب الحاليين وعلى كل طالب جديد يسجل في المستقبل تلقائياً.'
-            : 'This date will be applied to all existing students and automatically assigned to every new student who registers in the future.'}
+            ? 'إيقاف أو السماح للطلاب بتعديل الصيدلية، ساعات التواجد، التواريخ، وموقع الخريطة.'
+            : 'Stop or allow students to edit their pharmacy, hours, dates, and map location.'}
         </p>
-        <div style={{ display: 'flex', gap: 12, alignItems: 'flex-end', flexWrap: 'wrap' }}>
-          <div className="form-group" style={{ margin: 0, minWidth: 200 }}>
-            <label className="form-label" style={{ marginBottom: 6 }}>
-              {locale === 'ar' ? 'تاريخ الانتهاء' : 'Training End Date'}
-            </label>
-            <input
-              type="date"
-              className="form-control"
-              value={bulkEndDate}
-              onChange={e => setBulkEndDate(e.target.value)}
-            />
-          </div>
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
           <button
             type="button"
-            className="btn btn-primary"
-            onClick={handleBulkUpdateEndDate}
-            disabled={!bulkEndDate || bulkUpdating || bulkEndDate === savedGlobalEndDate}
+            className="btn"
+            onClick={handleToggleLock}
+            disabled={updatingLock}
             style={{
-              backgroundColor: bulkEndDate === savedGlobalEndDate && !bulkUpdating ? 'var(--green)' : undefined,
-              color: bulkEndDate === savedGlobalEndDate && !bulkUpdating ? '#ffffff' : undefined,
+              backgroundColor: lockEdits ? 'var(--green)' : 'var(--error)',
+              color: '#ffffff',
+              fontWeight: 600,
               transition: 'all 0.3s ease',
+              padding: '8px 16px',
             }}
           >
-            {bulkUpdating
-              ? (locale === 'ar' ? 'جاري الحفظ...' : 'Saving...')
-              : bulkEndDate === savedGlobalEndDate
-                ? (locale === 'ar' ? '✓ تم الحفظ بنجاح' : '✓ Saved Successfully')
-                : (locale === 'ar' ? '💾 حفظ لجميع الطلاب' : '💾 Save for All Students')}
+            {updatingLock
+              ? (locale === 'ar' ? 'جاري التحديث...' : 'Updating...')
+              : lockEdits
+                ? (locale === 'ar' ? '🔓 السماح بالتعديل' : '🔓 Allow Editing')
+                : (locale === 'ar' ? '🛑 ايقاف التعديل' : '🛑 Stop Editing')}
           </button>
+          <span style={{ fontSize: '0.875rem', fontWeight: 600, color: lockEdits ? 'var(--green)' : 'var(--error)' }}>
+            {lockEdits
+              ? (locale === 'ar' ? '❌ تعديل البيانات متوقف حالياً للطلاب' : '❌ Student edits are currently blocked')
+              : (locale === 'ar' ? '✅ تعديل البيانات متاح حالياً للطلاب' : '✅ Student edits are currently allowed')}
+          </span>
         </div>
       </div>
 
@@ -228,9 +287,9 @@ export default function AdminAssignments() {
                         </span>
                       </div>
                       <p className="text-xs text-muted" style={{marginTop:2}}>{s.userId?.email}</p>
-                      {(s.startDate || s.endDate) && (
+                      {s.startDate && (
                         <p className="text-xs text-muted" style={{marginTop:4, fontSize:'11px', display:'flex', alignItems:'center', gap:4}}>
-                          📅 {s.startDate ? new Date(s.startDate).toLocaleDateString() : '?'} – {s.endDate ? new Date(s.endDate).toLocaleDateString() : '?'}
+                          📅 {s.startDate.includes('-07-') ? (locale === 'ar' ? 'شهر السابع' : 'July') : s.startDate.includes('-08-') ? (locale === 'ar' ? 'شهر الثامن' : 'August') : (locale === 'ar' ? 'غير محدد' : 'Not set')}
                         </p>
                       )}
                     </td>
@@ -295,16 +354,30 @@ export default function AdminAssignments() {
                 </p>
 
                 <div className="form-group" style={{ marginBottom: 16 }}>
-                  <label className="form-label" style={{ color: 'var(--text-secondary)' }}>{locale === 'ar' ? 'تاريخ البدء' : 'Start Date'}</label>
-                  <input className="form-control" type="date" value={editForm.startDate}
-                    onChange={e => setEditForm(p => ({ ...p, startDate: e.target.value }))} />
+                  <label className="form-label" style={{ color: 'var(--text-secondary)' }}>{locale === 'ar' ? 'شهر التدريب' : 'Month of Training'}</label>
+                  <select
+                    className="form-control"
+                    value={getEditTrainingMonthValue()}
+                    onChange={handleEditTrainingMonthChange}
+                  >
+                    <option value="">{locale === 'ar' ? 'اختر شهر التدريب...' : 'Select training month...'}</option>
+                    <option value="july">{locale === 'ar' ? 'شهر السابع' : 'July'}</option>
+                    <option value="august">{locale === 'ar' ? 'شهر الثامن' : 'August'}</option>
+                  </select>
                 </div>
 
-                <div className="form-group" style={{ marginBottom: 16 }}>
-                  <label className="form-label" style={{ color: 'var(--text-secondary)' }}>{locale === 'ar' ? 'تاريخ الانتهاء' : 'End Date'}</label>
-                  <input className="form-control" type="date" value={editForm.endDate}
-                    onChange={e => setEditForm(p => ({ ...p, endDate: e.target.value }))} />
-                </div>
+                {editForm.startDate && editForm.endDate && (
+                  <div className="grid grid-2" style={{ gap: 16, marginBottom: 16 }}>
+                    <div className="form-group" style={{ margin: 0 }}>
+                      <label className="form-label" style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>{locale === 'ar' ? 'تاريخ البدء' : 'Start Date'}</label>
+                      <input className="form-control" type="date" value={editForm.startDate} disabled />
+                    </div>
+                    <div className="form-group" style={{ margin: 0 }}>
+                      <label className="form-label" style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>{locale === 'ar' ? 'تاريخ الانتهاء' : 'End Date'}</label>
+                      <input className="form-control" type="date" value={editForm.endDate} disabled />
+                    </div>
+                  </div>
+                )}
 
                 <div className="form-group" style={{ marginBottom: 16 }}>
                   <label className="form-label" style={{ color: 'var(--text-secondary)' }}>{t('statusLabel')}</label>

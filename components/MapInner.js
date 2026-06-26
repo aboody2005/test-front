@@ -62,7 +62,7 @@ function LocationMarker({ position, setPosition, onChange, isPicker }) {
   ) : null;
 }
 
-export default function MapInner({ lat, lng, onChange }) {
+export default function MapInner({ lat, lng, onChange, disabled }) {
   const { locale, t } = useTranslation();
   const defaultLat = lat || 33.3152;
   const defaultLng = lng || 44.3661;
@@ -70,7 +70,7 @@ export default function MapInner({ lat, lng, onChange }) {
   const [position, setPosition] = useState([defaultLat, defaultLng]);
   const [detecting, setDetecting] = useState(false);
 
-  const isPicker = !!onChange;
+  const isPicker = !!onChange && !disabled;
 
   useEffect(() => {
     if (lat && lng && (position[0] !== lat || position[1] !== lng)) {

@@ -28,8 +28,13 @@ export function exportReportsCSV(reports, filename = 'student_reports', locale =
         'خط الطول': r.student.longitude || '',
         'المشرف المعين': r.student.teacher || 'غير معين',
         'الحالة': statusVal,
-        'تاريخ البدء': r.student.startDate ? format(new Date(r.student.startDate), 'dd/MM/yyyy') : '',
-        'تاريخ الانتهاء': r.student.endDate ? format(new Date(r.student.endDate), 'dd/MM/yyyy') : '',
+        'شهر التدريب': r.student.startDate ? (
+          r.student.startDate.includes('-07-') || r.student.startDate.endsWith('-07-01')
+            ? 'شهر السابع'
+            : r.student.startDate.includes('-08-') || r.student.startDate.endsWith('-08-01')
+              ? 'شهر الثامن'
+              : 'غير محدد'
+        ) : '',
         'إجمالي الزيارات': r.visitCount,
         'آخر زيارة': r.lastVisit ? formatDateTime12h(r.lastVisit, 'ar') : 'لا يوجد',
       };
@@ -47,8 +52,13 @@ export function exportReportsCSV(reports, filename = 'student_reports', locale =
         'Longitude': r.student.longitude || '',
         'Assigned Teacher': r.student.teacher || 'Unassigned',
         'Status': r.student.status || '',
-        'Start Date': r.student.startDate ? format(new Date(r.student.startDate), 'dd/MM/yyyy') : '',
-        'End Date': r.student.endDate ? format(new Date(r.student.endDate), 'dd/MM/yyyy') : '',
+        'Month of Training': r.student.startDate ? (
+          r.student.startDate.includes('-07-') || r.student.startDate.endsWith('-07-01')
+            ? 'July'
+            : r.student.startDate.includes('-08-') || r.student.startDate.endsWith('-08-01')
+              ? 'August'
+              : 'Not set'
+        ) : '',
         'Total Visits': r.visitCount,
         'Last Visit': r.lastVisit ? formatDateTime12h(r.lastVisit, 'en') : 'None',
       };

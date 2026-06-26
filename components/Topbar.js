@@ -44,13 +44,16 @@ export default function Topbar({ onMenuToggle, title }) {
   };
 
   const translateMessage = (msg) => {
-    if (locale !== 'ar') return msg;
     if (!msg) return msg;
 
-    if (msg.startsWith('Your training site was visited and confirmed by ')) {
-      const teacherName = msg.replace('Your training site was visited and confirmed by ', '').replace(/\.$/, '');
-      return `تم زيارة موقع التدريب الخاص بك وتأكيده من قبل ${teacherName}.`;
+    if (msg.startsWith('Your training site was visited and confirmed by ') || msg === 'Your training site was visited and confirmed.') {
+      return locale === 'ar'
+        ? 'تم زيارة موقع التدريب الخاص بك وتأكيده من قبل المشرف الأكاديمي.'
+        : 'Your training site was visited and confirmed by the supervisor.';
     }
+
+    if (locale !== 'ar') return msg;
+
     if (msg === 'A supervisor teacher has been assigned to your training profile.' || msg === 'A teacher has been assigned to your profile.') {
       return 'تم تعيين مشرف أكاديمي لملف التدريب الخاص بك.';
     }

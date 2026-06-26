@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/utils/api';
-import { format, differenceInDays } from 'date-fns';
+import { format, differenceInDays, startOfDay } from 'date-fns';
 import { useTranslation } from '@/context/LanguageContext';
 import { formatTimeOnly12h } from '@/utils/date';
 
@@ -55,7 +55,22 @@ export default function StudentDashboard() {
 
   const daysLeft = () => {
     if (!student?.endDate) return null;
-    return differenceInDays(new Date(student.endDate), new Date());
+    
+    const parseLocalDate = (dateStr) => {
+      if (!dateStr) return null;
+      const parts = dateStr.split('T')[0].split('-');
+      if (parts.length === 3) {
+        return new Date(Date.UTC(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2])));
+      }
+      return new Date(dateStr);
+    };
+
+    const endUtc = parseLocalDate(student.endDate);
+    const today = new Date();
+    const todayUtc = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()));
+
+    if (!endUtc || !todayUtc) return null;
+    return differenceInDays(endUtc, todayUtc);
   };
 
   if (loading) return <div className="flex-center" style={{height:300}}><div className="spinner" /></div>;
@@ -119,14 +134,16 @@ export default function StudentDashboard() {
               <span style={{ fontSize: '2rem' }}>👨‍🏫</span>
               <div>
                 <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{locale === 'ar' ? 'المشرف الأكاديمي المعين' : 'Assigned Teacher'}</p>
-                <p style={{ fontWeight: 600 }}>{student?.teacherId?.name || (locale === 'ar' ? 'لم يتم التعيين بعد' : 'Not assigned yet')}</p>
-                {student?.teacherId?.email && <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{student.teacherId.email}</p>}
+                <p style={{ fontWeight: 600 }}>
+                  {student?.teacherId
+                    ? (locale === 'ar' ? 'تم تعيين مشرف أكاديمي' : 'Assigned')
+                    : (locale === 'ar' ? 'لم يتم التعيين بعد' : 'Not assigned yet')}
+                </p>
               </div>
             </div>
             {[
               { icon: '📍', label: locale === 'ar' ? 'الموقع' : 'Location', val: student?.locationId ? `${student.locationId.name}, ${student.locationId.city}` : (locale === 'ar' ? 'غير محدد' : 'Not set') },
-              { icon: '📅', label: t('startDateLabel'), val: student?.startDate ? format(new Date(student.startDate), 'dd MMM yyyy') : (locale === 'ar' ? 'غير محدد' : 'Not set') },
-              { icon: '🏁', label: t('endDateLabel'), val: student?.endDate ? format(new Date(student.endDate), 'dd MMM yyyy') : (locale === 'ar' ? 'غير محدد' : 'Not set') },
+              { icon: '📅', label: locale === 'ar' ? 'شهر التدريب' : 'Month of Training', val: student?.startDate ? (student.startDate.includes('-07-') ? (locale === 'ar' ? 'شهر السابع' : 'July') : student.startDate.includes('-08-') ? (locale === 'ar' ? 'شهر الثامن' : 'August') : (locale === 'ar' ? 'غير محدد' : 'Not set')) : (locale === 'ar' ? 'غير محدد' : 'Not set') },
             ].map(({ icon, label, val }) => (
               <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 0', borderBottom: '1px solid var(--border-light)', fontSize: '0.875rem' }}>
                 <span>{icon}</span>
@@ -147,7 +164,7 @@ export default function StudentDashboard() {
               <table>
                 <thead>
                   <tr>
-                    <th>{locale === 'ar' ? 'المشرف' : 'Teacher'}</th>
+                    <th>{locale === 'ar' ? 'المشرف' : 'Supervisor'}</th>
                     <th>{locale === 'ar' ? 'التاريخ' : 'Date'}</th>
                     <th>{locale === 'ar' ? 'الوقت' : 'Time'}</th>
                     <th>{locale === 'ar' ? 'ملاحظات' : 'Notes'}</th>
@@ -157,7 +174,7 @@ export default function StudentDashboard() {
                 <tbody>
                   {visits.slice(0, 8).map(v => (
                     <tr key={v._id}>
-                      <td>{v.teacherName}</td>
+                      <td>{locale === 'ar' ? 'المشرف الأكاديمي' : 'Academic Supervisor'}</td>
                       <td>{format(new Date(v.visitedAt), 'dd MMM yyyy')}</td>
                       <td>{formatTimeOnly12h(v.visitedAt, locale)}</td>
                       <td style={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v.notes || '—'}</td>

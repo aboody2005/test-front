@@ -13,6 +13,7 @@ export default function StudentProfile() {
   const [locations, setLocations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
   const fileRef = useRef();
 
   const [userForm, setUserForm] = useState({ name: '', email: '', phone: '', gender: '', profileImage: '', password: '', confirmPassword: '' });
@@ -27,10 +28,15 @@ export default function StudentProfile() {
   useEffect(() => {
     async function load() {
       try {
-        const [sRes, lRes] = await Promise.all([api.students.my(), api.locations.list()]);
+        const [sRes, lRes, lockRes] = await Promise.all([
+          api.students.my(),
+          api.locations.list(),
+          api.students.getLockStudentEdits().catch(() => ({ lockStudentEdits: false }))
+        ]);
         const s = sRes.student;
         setStudent(s);
         setLocations(lRes.locations || []);
+        setIsLocked(lockRes?.lockStudentEdits || false);
         setUserForm({
           name: user?.name || '',
           email: user?.email || '',
@@ -100,6 +106,43 @@ export default function StudentProfile() {
 
   const handleMapChange = ({ lat, lng }) => {
     setStudentForm(p => ({ ...p, latitude: lat, longitude: lng }));
+  };
+
+  const getTrainingMonthValue = () => {
+    if (!studentForm.startDate) return '';
+    if (studentForm.startDate.includes('-07-') || studentForm.startDate.endsWith('-07-01')) return 'july';
+    if (studentForm.startDate.includes('-08-') || studentForm.startDate.endsWith('-08-01')) return 'august';
+    try {
+      const date = new Date(studentForm.startDate);
+      const month = date.getMonth();
+      if (month === 6) return 'july';
+      if (month === 7) return 'august';
+    } catch {}
+    return '';
+  };
+
+  const handleTrainingMonthChange = (e) => {
+    const val = e.target.value;
+    const year = studentForm.startDate ? new Date(studentForm.startDate).getFullYear() : 2026;
+    if (val === 'july') {
+      setStudentForm(p => ({
+        ...p,
+        startDate: `${year}-07-01`,
+        endDate: `${year}-07-31`
+      }));
+    } else if (val === 'august') {
+      setStudentForm(p => ({
+        ...p,
+        startDate: `${year}-08-01`,
+        endDate: `${year}-08-31`
+      }));
+    } else {
+      setStudentForm(p => ({
+        ...p,
+        startDate: '',
+        endDate: ''
+      }));
+    }
   };
 
   const handleSave = async (e) => {
@@ -212,14 +255,53 @@ export default function StudentProfile() {
           {/* Training Info */}
           <div className="card">
             <div className="card-header"><h4 className="card-title">🎓 {t('trainingInfo')}</h4></div>
+            
+            {isLocked && (
+              <div style={{
+                marginBottom: 16,
+                padding: '10px 14px',
+                borderRadius: 'var(--radius-sm)',
+                border: '1px solid #fee2e2',
+                background: '#fef2f2',
+                color: '#ef4444',
+                fontSize: '0.85rem',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8
+              }}>
+                <span>🔒</span>
+                <span>
+                  {locale === 'ar'
+                    ? 'تم إيقاف تعديل بيانات التدريب من قبل الإدارة.'
+                    : 'Editing training details is locked by the admin.'}
+                </span>
+              </div>
+            )}
+
             <div className="form-group">
               <label className="form-label">{t('universityLabel')}</label>
               <input className="form-control" value="جامعة الحدباء" disabled />
             </div>
+            
             <div className="form-group">
               <label className="form-label">{t('pharmacyNameLabel')}</label>
               <input className="form-control" placeholder={locale === 'ar' ? 'مثال: صيدلية النور' : 'e.g. Al-Nour Pharmacy'} value={studentForm.pharmacyName}
-                onChange={e => setStudentForm(p => ({ ...p, pharmacyName: e.target.value }))} />
+                onChange={e => setStudentForm(p => ({ ...p, pharmacyName: e.target.value }))} disabled={isLocked} />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">{locale === 'ar' ? 'شهر التدريب' : 'Month of Training'}</label>
+              <select
+                className="form-control"
+                value={getTrainingMonthValue()}
+                onChange={handleTrainingMonthChange}
+                disabled={isLocked}
+              >
+                <option value="">{locale === 'ar' ? 'اختر شهر التدريب...' : 'Select training month...'}</option>
+                <option value="july">{locale === 'ar' ? 'شهر السابع' : 'July'}</option>
+                <option value="august">{locale === 'ar' ? 'شهر الثامن' : 'August'}</option>
+              </select>
             </div>
 
             {/* Attendance Time */}
@@ -257,6 +339,7 @@ export default function StudentProfile() {
                       <select
                         className="form-control"
                         value={studentForm.attendanceStart}
+                        disabled={isLocked}
                         onChange={e => {
                           const newStart = e.target.value;
                           setStudentForm(p => ({
@@ -282,6 +365,7 @@ export default function StudentProfile() {
                       <select
                         className="form-control"
                         value={studentForm.attendanceEnd}
+                        disabled={isLocked}
                         onChange={e => setStudentForm(p => ({ ...p, attendanceEnd: e.target.value }))}
                       >
                         <option value="">{locale === 'ar' ? 'اختر وقت الانتهاء' : 'Select end time'}</option>
@@ -300,31 +384,25 @@ export default function StudentProfile() {
                 </div>
               );
             })()}
-            <div className="grid grid-2" style={{ gap: 16 }}>
-              <div className="form-group">
-                <label className="form-label">{t('startDateLabel')}</label>
-                <input className="form-control" type="date" value={studentForm.startDate}
-                  onChange={e => setStudentForm(p => ({ ...p, startDate: e.target.value }))} />
-              </div>
-              <div className="form-group">
-                <label className="form-label">{t('endDateLabel')}</label>
-                <input className="form-control" type="date" value={studentForm.endDate} disabled />
-              </div>
-            </div>
+
+
+
             <div className="form-group">
               <label className="form-label">{t('pharmacyLocationLabel')}</label>
               <select className="form-control" value={studentForm.locationId}
-                onChange={e => setStudentForm(p => ({ ...p, locationId: e.target.value }))}>
+                onChange={e => setStudentForm(p => ({ ...p, locationId: e.target.value }))} disabled={isLocked}>
                 <option value="">{locale === 'ar' ? 'اختر الموقع...' : 'Select location...'}</option>
                 {locations.map(l => (
                   <option key={l._id} value={l._id}>{l.region || l.name} — {l.city}</option>
                 ))}
               </select>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 6 }}>
-                <button type="button" className="btn btn-secondary btn-sm" style={{ padding: '4px 8px', fontSize: '0.75rem' }} onClick={() => setNewLocationModal(true)}>
-                  ➕ {t('cantFindLocationBtn')}
-                </button>
-              </div>
+              {!isLocked && (
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 6 }}>
+                  <button type="button" className="btn btn-secondary btn-sm" style={{ padding: '4px 8px', fontSize: '0.75rem' }} onClick={() => setNewLocationModal(true)}>
+                    ➕ {t('cantFindLocationBtn')}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -332,7 +410,7 @@ export default function StudentProfile() {
           <div className="card" style={{ gridColumn: '1 / -1' }}>
             <div className="card-header"><h4 className="card-title">🗺️ {t('gpsLocation')}</h4></div>
             <p className="text-muted text-sm" style={{ marginBottom: 16 }}>{t('gpsHint')}</p>
-            <LocationPicker lat={studentForm.latitude} lng={studentForm.longitude} onChange={handleMapChange} />
+            <LocationPicker lat={studentForm.latitude} lng={studentForm.longitude} onChange={handleMapChange} disabled={isLocked} />
           </div>
         </div>
 

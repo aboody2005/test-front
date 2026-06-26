@@ -1,7 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { api } from '@/utils/api';
-import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 import dynamic from 'next/dynamic';
 import { useTranslation } from '@/context/LanguageContext';
@@ -156,10 +155,9 @@ export default function TeacherStudents() {
               <thead>
                 <tr>
                   <th>{locale === 'ar' ? 'الطالب' : 'Student'}</th>
-                  <th>{t('universityLabel')}</th>
                   <th>{locale === 'ar' ? 'الصيدلية / الموقع' : 'Pharmacy / Location'}</th>
                   <th>{t('statusLabel')}</th>
-                  <th>{locale === 'ar' ? 'التواريخ' : 'Dates'}</th>
+                  <th>{locale === 'ar' ? 'شهر التدريب' : 'Month of Training'}</th>
                   <th>{t('actions')}</th>
                 </tr>
               </thead>
@@ -185,7 +183,6 @@ export default function TeacherStudents() {
                           </div>
                         </div>
                       </td>
-                      <td className="text-sm">{s.university || '—'}</td>
                       <td className="text-sm">
                         {s.pharmacyName || s.locationId?.name || '—'}
                         <br />
@@ -197,8 +194,13 @@ export default function TeacherStudents() {
                         </span>
                       </td>
                       <td className="text-xs text-muted">
-                        {s.startDate ? format(new Date(s.startDate), 'dd/MM/yy') : '?'} –{' '}
-                        {s.endDate ? format(new Date(s.endDate), 'dd/MM/yy') : '?'}
+                        {s.startDate ? (
+                          s.startDate.includes('-07-') || s.startDate.endsWith('-07-01')
+                            ? (locale === 'ar' ? 'شهر السابع' : 'July')
+                            : s.startDate.includes('-08-') || s.startDate.endsWith('-08-01')
+                              ? (locale === 'ar' ? 'شهر الثامن' : 'August')
+                              : (locale === 'ar' ? 'غير محدد' : 'Not set')
+                        ) : (locale === 'ar' ? 'غير محدد' : 'Not set')}
                       </td>
                       <td>
                         {s.isVisited ? (
@@ -312,16 +314,19 @@ export default function TeacherStudents() {
                   [locale === 'ar' ? 'الطالب' : 'Student', selected.userId?.name || '—'],
                   [locale === 'ar' ? 'الهاتف' : 'Phone', selected.userId?.phone || '—'],
                   [locale === 'ar' ? 'الجنس' : 'Gender', selected.userId?.gender || '—'],
-                  [locale === 'ar' ? 'الجامعة' : 'University', selected.university || '—'],
                   [locale === 'ar' ? 'الصيدلية' : 'Pharmacy', selected.pharmacyName || '—'],
                   [locale === 'ar' ? 'الموقع' : 'Location',
                     selected.locationId
                       ? `${selected.locationId.region || selected.locationId.name}, ${selected.locationId.city}`
                       : '—'],
-                  [locale === 'ar' ? 'تاريخ البدء' : 'Start Date',
-                    selected.startDate ? format(new Date(selected.startDate), 'dd/MM/yyyy') : '—'],
-                  [locale === 'ar' ? 'تاريخ الانتهاء' : 'End Date',
-                    selected.endDate ? format(new Date(selected.endDate), 'dd/MM/yyyy') : '—'],
+                  [locale === 'ar' ? 'شهر التدريب' : 'Month of Training',
+                    selected.startDate ? (
+                      selected.startDate.includes('-07-') || selected.startDate.endsWith('-07-01')
+                        ? (locale === 'ar' ? 'شهر السابع' : 'July')
+                        : selected.startDate.includes('-08-') || selected.startDate.endsWith('-08-01')
+                          ? (locale === 'ar' ? 'شهر الثامن' : 'August')
+                          : (locale === 'ar' ? 'غير محدد' : 'Not set')
+                    ) : '—'],
                   [locale === 'ar' ? 'وقت بداية التواجد' : 'Attendance Start',
                     fmt12h(selected.attendanceStart)],
                   [locale === 'ar' ? 'وقت انتهاء التواجد' : 'Attendance End',

@@ -427,7 +427,7 @@ export const api = {
       if (university !== undefined) updateData.university = university;
       if (pharmacyName !== undefined) updateData.pharmacy_name = pharmacyName;
       if (startDate !== undefined) updateData.start_date = startDate || null;
-      if (endDate !== undefined && role === 'admin') updateData.end_date = endDate || null;
+      if (endDate !== undefined) updateData.end_date = endDate || null;
       if (locationId !== undefined) updateData.location_id = locationId || null;
       if (latitude !== undefined) updateData.latitude = latitude || null;
       if (longitude !== undefined) updateData.longitude = longitude || null;
@@ -493,6 +493,25 @@ export const api = {
         .eq('key', 'defaultTrainingEndDate')
         .maybeSingle();
       return { defaultTrainingEndDate: setting?.value || null };
+    },
+
+    /** Get whether student edits are locked */
+    getLockStudentEdits: async () => {
+      const { data: setting } = await supabase
+        .from('settings')
+        .select('value')
+        .eq('key', 'lockStudentEdits')
+        .maybeSingle();
+      return { lockStudentEdits: setting?.value === 'true' };
+    },
+
+    /** Set whether student edits are locked */
+    setLockStudentEdits: async (lockValue) => {
+      const { error } = await supabase
+        .from('settings')
+        .upsert({ key: 'lockStudentEdits', value: lockValue ? 'true' : 'false' }, { onConflict: 'key' });
+      if (error) throwError(error, 'Error saving lock setting');
+      return { lockStudentEdits: lockValue };
     },
   },
 
@@ -660,7 +679,7 @@ export const api = {
       if (studentUserId) {
         await supabase.from('notifications').insert({
           user_id: studentUserId,
-          message: `Your training site was visited and confirmed by ${teacher.name}.`,
+          message: `Your training site was visited and confirmed.`,
           type: 'success',
         });
       }

@@ -69,7 +69,10 @@ export default function TeacherDashboard() {
                 </div>
                 <div style={{ flex: 1, overflow: 'hidden' }}>
                   <p style={{ fontWeight: 600, fontSize: '0.875rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.userId?.name}</p>
-                  <p className="text-xs text-muted">{s.pharmacyName || s.locationId?.name || '—'}</p>
+                  <p className="text-xs text-muted">
+                    {s.pharmacyName || s.locationId?.name || '—'}
+                    {s.startDate && ` • ${s.startDate.includes('-07-') || s.startDate.endsWith('-07-01') ? (locale === 'ar' ? 'شهر السابع' : 'July') : s.startDate.includes('-08-') || s.startDate.endsWith('-08-01') ? (locale === 'ar' ? 'شهر الثامن' : 'August') : ''}`}
+                  </p>
                 </div>
                 <span className={`badge badge-${s.status === 'completed' ? 'completed' : 'active'}`}>
                   {s.status === 'completed' ? t('completedHours') : t('activeTraining')}

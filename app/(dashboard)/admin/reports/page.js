@@ -134,6 +134,11 @@ export default function AdminReports() {
                     <td>
                       <p style={{fontWeight:600,fontSize:'0.875rem'}}>{r.student.name}</p>
                       <p className="text-xs text-muted">{r.student.email}</p>
+                      {r.student.startDate && (
+                        <p className="text-xs text-muted" style={{marginTop:4, fontSize:'11px', display:'flex', alignItems:'center', gap:4}}>
+                          📅 {r.student.startDate.includes('-07-') || r.student.startDate.endsWith('-07-01') ? (locale === 'ar' ? 'شهر السابع' : 'July') : r.student.startDate.includes('-08-') || r.student.startDate.endsWith('-08-01') ? (locale === 'ar' ? 'شهر الثامن' : 'August') : ''}
+                        </p>
+                      )}
                     </td>
                     <td className="text-sm">{r.student.university||'—'}</td>
                     <td className="text-sm">{r.student.pharmacyName||'—'}</td>

@@ -257,7 +257,12 @@ export default function AdminVisits() {
                         </div>
                         <div>
                           <p style={{ fontWeight: 600, fontSize: '0.875rem', margin: 0 }}>{r.name}</p>
-                          <span className="text-muted text-xs">{r.phone}</span>
+                          <span className="text-muted text-xs" style={{ display: 'block' }}>{r.phone}</span>
+                          {r.startDate && (
+                            <span className="text-muted text-xs" style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
+                              📅 {r.startDate.includes('-07-') || r.startDate.endsWith('-07-01') ? (locale === 'ar' ? 'شهر السابع' : 'July') : r.startDate.includes('-08-') || r.startDate.endsWith('-08-01') ? (locale === 'ar' ? 'شهر الثامن' : 'August') : (locale === 'ar' ? 'غير محدد' : 'Not set')}
+                            </span>
+                          )}
                         </div>
                       </div>
                     </td>
@@ -367,7 +372,6 @@ export default function AdminVisits() {
                     selected.gender === 'male' ? (locale === 'ar' ? 'ذكر' : 'Male')
                     : selected.gender === 'female' ? (locale === 'ar' ? 'أنثى' : 'Female')
                     : '—'],
-                  [locale === 'ar' ? 'الجامعة' : 'University', selected.university],
                   [locale === 'ar' ? 'الصيدلية' : 'Pharmacy', selected.pharmacyName],
                   [locale === 'ar' ? 'الموقع' : 'Location',
                     selected.location ? `${selected.location.name}, ${selected.location.city}` : '—'],
@@ -377,6 +381,14 @@ export default function AdminVisits() {
                     selected.status === 'completed'
                       ? (locale === 'ar' ? 'مكتمل' : 'Completed')
                       : (locale === 'ar' ? 'نشط' : 'Active')],
+                  [locale === 'ar' ? 'شهر التدريب' : 'Month of Training',
+                    selected.startDate ? (
+                      selected.startDate.includes('-07-') || selected.startDate.endsWith('-07-01')
+                        ? (locale === 'ar' ? 'شهر السابع' : 'July')
+                        : selected.startDate.includes('-08-') || selected.startDate.endsWith('-08-01')
+                          ? (locale === 'ar' ? 'شهر الثامن' : 'August')
+                          : (locale === 'ar' ? 'غير محدد' : 'Not set')
+                    ) : '—'],
                   [locale === 'ar' ? 'وقت بداية التواجد' : 'Attendance Start',
                     fmt12h(selected.attendanceStart)],
                   [locale === 'ar' ? 'وقت انتهاء التواجد' : 'Attendance End',

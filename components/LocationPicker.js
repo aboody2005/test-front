@@ -9,6 +9,6 @@ const MapComponent = dynamic(() => import('./MapInner'), { ssr: false, loading: 
   </div>
 ) });
 
-export default function LocationPicker({ lat, lng, onChange }) {
-  return <MapComponent lat={lat} lng={lng} onChange={onChange} />;
+export default function LocationPicker({ lat, lng, onChange, disabled }) {
+  return <MapComponent lat={lat} lng={lng} onChange={onChange} disabled={disabled} />;
 }
