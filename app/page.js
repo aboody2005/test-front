@@ -4,20 +4,32 @@ import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useTranslation } from '@/context/LanguageContext';
-import { useRouter } from 'next/navigation';
 import styles from './home.module.css';
 
 export default function HomePage() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { locale, toggleLanguage, t } = useTranslation();
-  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
 
   // Redirect logged-in users to their dashboard
   useEffect(() => {
-    if (user) router.push(`/${user.role}/dashboard`);
-  }, [user, router]);
+    if (!loading) {
+      if (user) {
+        window.location.href = `/${user.role}/dashboard`;
+      } else {
+        window.location.href = '/login';
+      }
+    }
+  }, [user, loading]);
+
+  if (loading || !user) {
+    return (
+      <div className="flex-center" style={{ height: '100vh' }}>
+        <div className="spinner" />
+      </div>
+    );
+  }
 
   const features = [
     { icon: '🎓', title: t('featureStudentProfile'), desc: t('featureStudentProfileDesc') },

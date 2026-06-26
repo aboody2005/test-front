@@ -33,16 +33,19 @@ export default function DashboardLayout({ children }) {
     });
   }, []);
 
+  useEffect(() => {
+    if (!loading && !user) {
+      window.location.href = '/login';
+    }
+  }, [loading, user]);
 
-  if (loading) {
+  if (loading || !user) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: 'var(--bg-primary)' }}>
         <div className="spinner" style={{ width: 48, height: 48 }} />
       </div>
     );
   }
-
-  if (!user) return null;
 
   const titleKey = routeTitleKeys[pathname] || 'sideDashboard';
   const title = t(titleKey);
