@@ -298,7 +298,7 @@ export default function AdminAssignments() {
           <option value="">{t('allLocations')}</option>
           {locations.map(l => (
             <option key={l._id} value={l._id}>
-              {l.region || l.name} — {l.city}
+              {l.city} — {l.region || l.name}
             </option>
           ))}
         </select>
@@ -381,7 +381,7 @@ export default function AdminAssignments() {
                       {s.pharmacyName || '—'}
                       {s.locationId && (
                         <div className="text-xs text-muted" style={{marginTop:2}}>
-                          📍 {s.locationId.region || s.locationId.name} — {s.locationId.city}
+                          📍 {s.locationId.city} — {s.locationId.region || s.locationId.name}
                         </div>
                       )}
                     </td>
@@ -511,7 +511,7 @@ export default function AdminAssignments() {
                     onChange={e => setEditForm(p => ({ ...p, locationId: e.target.value }))}>
                     <option value="">{locale === 'ar' ? '— غير محدد —' : '— Select Location —'}</option>
                     {locations.map(l => (
-                      <option key={l._id} value={l._id}>{l.region || l.name} — {l.city}</option>
+                      <option key={l._id} value={l._id}>{l.city} — {l.region || l.name}</option>
                     ))}
                   </select>
                 </div>

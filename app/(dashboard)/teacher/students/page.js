@@ -313,7 +313,7 @@ export default function TeacherStudents() {
                   [locale === 'ar' ? 'الصيدلية' : 'Pharmacy', selected.pharmacyName || '—'],
                   [locale === 'ar' ? 'الموقع' : 'Location',
                     selected.locationId
-                      ? `${selected.locationId.region || selected.locationId.name}, ${selected.locationId.city}`
+                      ? `${selected.locationId.city}, ${selected.locationId.region || selected.locationId.name}`
                       : '—'],
                   [locale === 'ar' ? 'شهر التدريب' : 'Month of Training',
                     selected.startDate ? (

@@ -103,7 +103,7 @@ export default function AdminProfile() {
           {[
             { label: t('fullNameLabel'), key: 'name', type: 'text', placeholder: locale === 'ar' ? 'الاسم الكامل' : 'Your full name' },
             { label: t('emailLabel'), key: 'email', type: 'email', placeholder: 'your.email@example.com' },
-            { label: t('phoneLabel'), key: 'phone', type: 'tel', placeholder: '+964-770-...' },
+            { label: t('phoneLabel'), key: 'phone', type: 'tel', placeholder: '07XXXXXXXXX' },
             { label: locale === 'ar' ? 'كلمة المرور الجديدة (اتركها فارغة للاحتفاظ بالحالية)' : 'New Password (leave blank to keep current)', key: 'password', type: 'password', placeholder: '••••••••' },
             { label: t('confirmPasswordLabel'), key: 'confirmPassword', type: 'password', placeholder: '••••••••' },
           ].map(({ label, key, type, placeholder }) => {
@@ -133,7 +133,17 @@ export default function AdminProfile() {
                   </div>
                 ) : (
                   <input className="form-control" type={type} placeholder={placeholder} value={userForm[key] || ''}
-                    onChange={e => setUserForm(p => ({ ...p, [key]: e.target.value }))} />
+                    onChange={e => {
+                      let val = e.target.value;
+                      if (key === 'phone') {
+                        const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+                        for (let i = 0; i < 10; i++) {
+                          val = val.replace(new RegExp(arabicDigits[i], 'g'), i);
+                        }
+                        val = val.replace(/[^0-9]/g, '');
+                      }
+                      setUserForm(p => ({ ...p, [key]: val }));
+                    }} />
                 )}
               </div>
             );

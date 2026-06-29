@@ -28,6 +28,7 @@ export default function AdminVisits() {
   const [teacherFilter, setTeacherFilter] = useState('');
   const [teachers, setTeachers] = useState([]);
   const [selected, setSelected] = useState(null);
+  const [sortOrder, setSortOrder] = useState('asc'); // 'asc' | 'desc'
 
   /* ─── Load all students (admin sees all) + visits ─── */
   const load = async () => {
@@ -121,6 +122,12 @@ export default function AdminVisits() {
       !r.isVisited;
     const matchTeacher = !teacherFilter || (r.teacher?.id === teacherFilter);
     return matchSearch && matchStatus && matchTeacher;
+  }).sort((a, b) => {
+    if (sortOrder === 'asc') {
+      return a.name.localeCompare(b.name, locale === 'ar' ? 'ar' : 'en');
+    } else {
+      return b.name.localeCompare(a.name, locale === 'ar' ? 'ar' : 'en');
+    }
   });
 
   /* ─── Stats ─── */
@@ -214,6 +221,17 @@ export default function AdminVisits() {
           {teachers.map(tc => (
             <option key={tc.id} value={tc.id}>{tc.name}</option>
           ))}
+        </select>
+
+        {/* Sorting Dropdown */}
+        <select
+          className="form-control"
+          style={{ width: 180 }}
+          value={sortOrder}
+          onChange={e => setSortOrder(e.target.value)}
+        >
+          <option value="asc">{locale === 'ar' ? 'ترتيب: أ - ي' : 'Sort: A - Z'}</option>
+          <option value="desc">{locale === 'ar' ? 'ترتيب: ي - أ' : 'Sort: Z - A'}</option>
         </select>
       </div>
 
@@ -375,7 +393,7 @@ export default function AdminVisits() {
                     : '—'],
                   [locale === 'ar' ? 'الصيدلية' : 'Pharmacy', selected.pharmacyName],
                   [locale === 'ar' ? 'الموقع' : 'Location',
-                    selected.location ? `${selected.location.name}, ${selected.location.city}` : '—'],
+                    selected.location ? `${selected.location.city}, ${selected.location.name}` : '—'],
                   [locale === 'ar' ? 'المشرف الأكاديمي' : 'Supervisor',
                     selected.teacher?.name || '—'],
                   [locale === 'ar' ? 'الحالة' : 'Status',

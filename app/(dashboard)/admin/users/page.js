@@ -201,7 +201,24 @@ export default function AdminUsers() {
                   {[['Full Name', 'name', 'text'], ['Email', 'email', 'email'], ['Phone', 'phone', 'tel']].map(([l, k, t]) => (
                     <div key={k} className="form-group" style={{ marginBottom: 12 }}>
                       <label className="form-label">{l}</label>
-                      <input className="form-control" type={t} value={form[k]} onChange={set(k)} required={k !== 'phone'} />
+                      <input
+                        className="form-control"
+                        type={t}
+                        value={form[k]}
+                        placeholder={k === 'phone' ? '07XXXXXXXXX' : ''}
+                        onChange={e => {
+                          let val = e.target.value;
+                          if (k === 'phone') {
+                            const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+                            for (let i = 0; i < 10; i++) {
+                              val = val.replace(new RegExp(arabicDigits[i], 'g'), i);
+                            }
+                            val = val.replace(/[^0-9]/g, '');
+                          }
+                          setForm(p => ({ ...p, [k]: val }));
+                        }}
+                        required={k !== 'phone'}
+                      />
                     </div>
                   ))}
                   <div className="form-group" style={{ marginBottom: 12 }}>

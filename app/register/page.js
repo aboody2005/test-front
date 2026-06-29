@@ -29,7 +29,7 @@ export default function RegisterPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [newLocationModal, setNewLocationModal] = useState(false);
-  const [newLocForm, setNewLocForm] = useState({ city: '', region: '' });
+  const [newLocForm, setNewLocForm] = useState({ city: '', name: '' });
   const [addingLoc, setAddingLoc] = useState(false);
 
   // Load locations via server-side API (works without auth)
@@ -53,8 +53,8 @@ export default function RegisterPage() {
 
   const handleCreateLocation = async (e) => {
     e.preventDefault();
-    if (!newLocForm.city || !newLocForm.region) {
-      return toast.error(locale === 'ar' ? 'المدينة والمنطقة مطلوبة' : 'City and Region are required');
+    if (!newLocForm.city || !newLocForm.name) {
+      return toast.error(locale === 'ar' ? 'المدينة واسم الصيدلية مطلوبان' : 'City and Pharmacy Name are required');
     }
     setAddingLoc(true);
     try {
@@ -63,8 +63,8 @@ export default function RegisterPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           city: newLocForm.city,
-          region: newLocForm.region,
-          name: newLocForm.region,
+          name: newLocForm.name,
+          region: '',
         }),
       });
 
@@ -73,9 +73,9 @@ export default function RegisterPage() {
 
       const newLoc = data.location;
       setLocations((prev) => [...prev, newLoc]);
-      setForm((prev) => ({ ...prev, locationId: newLoc.id }));
+      setForm((prev) => ({ ...prev, locationId: newLoc.id || newLoc._id }));
       setNewLocationModal(false);
-      setNewLocForm({ city: '', region: '' });
+      setNewLocForm({ city: '', name: '' });
       toast.success(locale === 'ar' ? 'تم إنشاء موقع الصيدلية وتحديده بنجاح!' : 'Location created and selected!');
     } catch (err) {
       toast.error(err.message);
@@ -139,7 +139,10 @@ export default function RegisterPage() {
                 className="form-control"
                 placeholder={locale === 'ar' ? 'الاسم الكامل' : 'Full Name'}
                 value={form.name}
-                onChange={set('name')}
+                onChange={(e) => {
+                  const cleaned = e.target.value.replace(/[^\u0600-\u06FF\s]/g, '');
+                  setForm((p) => ({ ...p, name: cleaned }));
+                }}
                 required
               />
             </div>
@@ -163,7 +166,15 @@ export default function RegisterPage() {
                 type="tel"
                 placeholder="07XXXXXXXXX"
                 value={form.phone}
-                onChange={set('phone')}
+                onChange={(e) => {
+                  let val = e.target.value;
+                  const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+                  for (let i = 0; i < 10; i++) {
+                    val = val.replace(new RegExp(arabicDigits[i], 'g'), i);
+                  }
+                  val = val.replace(/[^0-9]/g, '');
+                  setForm((p) => ({ ...p, phone: val }));
+                }}
               />
             </div>
 
@@ -299,12 +310,12 @@ export default function RegisterPage() {
                   />
                 </div>
                 <div className="form-group" style={{ marginBottom: 16 }}>
-                  <label className="form-label" style={{ color: 'var(--text-secondary)' }}>{t('regionLabel')} *</label>
+                  <label className="form-label" style={{ color: 'var(--text-secondary)' }}>{locale === 'ar' ? 'اسم الصيدلية' : 'Pharmacy Name'} *</label>
                   <input
                     className="form-control"
-                    placeholder={locale === 'ar' ? 'مثال: حي الزهور' : 'e.g. Al-Zuhour Quarter'}
-                    value={newLocForm.region}
-                    onChange={(e) => setNewLocForm((p) => ({ ...p, region: e.target.value }))}
+                    placeholder={locale === 'ar' ? 'مثال: صيدلية النور' : 'e.g. Al-Nour Pharmacy'}
+                    value={newLocForm.name}
+                    onChange={(e) => setNewLocForm((p) => ({ ...p, name: e.target.value }))}
                     required
                   />
                 </div>
